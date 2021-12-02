@@ -1,36 +1,12 @@
-const PORT = process.env.PORT || 8001;
-const ENV = require("./environment");
+import React from 'react'
+import ReactDOM from 'react-dom'
+import axios from 'axios'
 
-const app = require("./application")(ENV, { updateAppointment });
-const server = require("http").Server(app);
+import 'index.scss'
 
-const WebSocket = require("ws");
-const wss = new WebSocket.Server({ server });
+import Application from 'components/Application'
 
-wss.on("connection", socket => {
-  socket.onmessage = event => {
-    console.log(`Message Received: ${event.data}`);
-
-    if (event.data === "ping") {
-      socket.send(JSON.stringify("pong"));
-    }
-  };
-});
-
-function updateAppointment(id, interview) {
-  wss.clients.forEach(function eachClient(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(
-        JSON.stringify({
-          type: "SET_INTERVIEW",
-          id,
-          interview
-        })
-      );
-    }
-  });
+if (process.env.REACT_APP_API_BASE_URL) {
+  axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL
 }
-
-server.listen(PORT, () => {
-  console.log(`Listening on port ${PORT} in ${ENV} mode.`);
-});
+ReactDOM.render(<Application />, document.getElementById('root'))
